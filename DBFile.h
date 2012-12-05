@@ -1,37 +1,58 @@
-#ifndef DBFILE_H
-#define DBFILE_H
+#ifndef DB_FILE_H
+#define DB_FILE_H
 
-#include "TwoWayList.h"
-#include "Record.h"
-#include "Schema.h"
-#include "File.h"
-#include "Comparison.h"
-#include "ComparisonEngine.h"
+#include "GenericDBFile.h"
+#include "Heap.h"
+#include "Sorted.h"
 
-typedef enum {heap, sorted, tree} fType;
+// Enum for file types
+typedef enum
+{
+	heap,
+	sorted,
+	tree
+} fType;
 
-// stub DBFile header..replace it with your own DBFile.h
-
-class DBFile {
+class DBFile
+{
 private:
-    File disk_store;
-    Page* current_page;
-    int page_num;
-    int writing;
+    GenericDBFile* m_pGenDBFile;
+
 public:
-    DBFile ();
+    DBFile();
     ~DBFile();
 
-    int Create (char *fpath, fType file_type, void *startup);
-    int Open (char *fpath);
+    // name = location of the file
+    // fType = heap, sorted, tree
+    // return value: 1 on success, 0 on failure
+    int Create (char *name, fType myType, void *startup);
+
+    // This function assumes that the DBFile already exists
+    // and has previously been created and then closed.
+    int Open (char *name);
+
+    // Closes the file.
+    // The return value is a 1 on success and a zero on failure
     int Close ();
 
-    void Load (Schema &myschema, char *loadpath);
+    // Bulk loads the DBFile instance from a text file,
+    // appending new data to it using the SuckNextRecord function from Record.h
+    // loadMe is the name of the data file to bulk load.
+    void Load (Schema &mySchema, char *loadMe);
 
-    void MoveFirst ();
-    void Add (Record &addme);
-    int GetNext (Record &fetchme);
-    int GetNext (Record &fetchme, CNF &cnf, Record &literal);
+    // Forces the pointer to correspond to the first record in the file
+    void MoveFirst();
+
+    // Add new record to the end of the file
+    // Note: addMe is consumed by this function and cannot be used again
+    void Add (Record &addMe);
+
+    // Fetch next record (relative to p_currPtr) into fetchMe
+    int GetNext (Record &fetchMe);
+
+    // Applies CNF and then fetches the next record
+    int GetNext (Record &fetchMe, CNF &applyMe, Record &literal);
 
 };
+
 #endif
