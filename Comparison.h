@@ -6,7 +6,10 @@
 #include "File.h"
 #include "Comparison.h"
 #include "ComparisonEngine.h"
+#include <sstream>
+#include <string>
 
+using namespace std;
 
 // This stores an individual comparison that is part of a CNF
 class Comparison {
@@ -32,6 +35,10 @@ public:
 
 	// print to the screen
 	void Print ();
+
+    bool isJoin();
+
+    string ToString();
 };
 
 
@@ -42,13 +49,13 @@ class OrderMaker {
 
 	friend class ComparisonEngine;
 	friend class CNF;
-
+public:
 	int numAtts;
 
 	int whichAtts[MAX_ANDS];
 	Type whichTypes[MAX_ANDS];
 
-public:
+
 	
 	// creates an empty OrdermMaker
 	OrderMaker();
@@ -57,8 +64,12 @@ public:
 	// based upon ALL of their attributes
 	OrderMaker(Schema *schema);
 
-	// print to the screen
+    OrderMaker(Schema *schema, struct Attribute* atts, int n); 
+        // print to the screen
 	void Print ();
+
+        //returns the string representation of OrderMaker
+        std::string ToString();
 };
 
 class Record;
@@ -84,6 +95,8 @@ public:
 	// for the given comparison
 	int GetSortOrders (OrderMaker &left, OrderMaker &right);
 
+        int GetCNFSortOrder (OrderMaker &left, OrderMaker &right);
+
 	// print the comparison structure to the screen
 	void Print ();
 
@@ -98,6 +111,10 @@ public:
         void GrowFromParseTree (struct AndList *parseTree, Schema *mySchema, 
 		Record &literal);
 
+        
+        //returns common attributes of 2 OrderMakers in a 3rd OrderMaker
+        //if no attributes match, it returns null
+        OrderMaker* GetMatchingOrder(OrderMaker& file_order);
 };
 
 #endif
